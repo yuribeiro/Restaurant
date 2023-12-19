@@ -96,8 +96,15 @@ public class MenuController {
     }
 
     /* Switch table status to open, to receive orders or closed to close the table, to not receive orders
-     *  curl -X PUT localhost:8080/sirenarestaurants/table/X -H "Content-Type: application/json" -d "{\"statusTable\": \"open\"}" - to open table for orders
-     *  curl -X PUT localhost:8080/sirenarestaurants/table/X -H "Content-Type: application/json" -d "{\"statusTable\": \"closed\"}" - to close table for orders 
+     *  OPEN TABLE - To open table for orders
+     *  curl -X PUT localhost:8080/sirenarestaurants/table/X
+     *  -H "Content-Type: application/json"
+     *  -d "{\"statusTable\": \"open\"}"
+     * 
+     * CLOSE TABLE - To close table for orders 
+     *  curl -X PUT localhost:8080/sirenarestaurants/table/X
+     *  -H "Content-Type: application/json"
+     *  -d "{\"statusTable\": \"closed\"}"
     */
     @PutMapping("/table/{id}")
     public TableOrder openOrCloseTables(@RequestBody TableOrder tableOrder, @PathVariable("id") Integer id){
@@ -130,11 +137,11 @@ public class MenuController {
     }
 
     // Get the total balance for table
-    /*  localhost:8080/sirenarestaurants/table/1 - table 1
-     *  localhost:8080/sirenarestaurants/table/2 - table 2
-     *  localhost:8080/sirenarestaurants/table/3 - table 3
-     *  localhost:8080/sirenarestaurants/table/4 - table 4
-     *  localhost:8080/sirenarestaurants/table/5 - table 5
+    /*  localhost:8080/sirenarestaurants/table/total/1 - table 1
+     *  localhost:8080/sirenarestaurants/table/total/2 - table 2
+     *  localhost:8080/sirenarestaurants/table/total/3 - table 3
+     *  localhost:8080/sirenarestaurants/table/total/4 - table 4
+     *  localhost:8080/sirenarestaurants/table/total/5 - table 5
     */
     @GetMapping("/table/total/{id}")
     public TableOrder getTotalSoldFromTable(@PathVariable("id") Integer id){
@@ -188,7 +195,9 @@ public class MenuController {
     public Iterable<MenuItem> getByCategory(@PathVariable String category){return this.menuRepository.findByCategory(category.toLowerCase());}
 
     /* Add a new order (numberTable: 1 to 5, itemNumber: 1 to 20, unitOrder: X)
-     * curl -X POST localhost:8080/sirenarestaurants/table/X -H "Content-Type: application/json" -d "{\"numberTable\": Integer,  \"itemNumber\": Integer, \"unitOrder\": Integer"}"
+     *  curl -X POST localhost:8080/sirenarestaurants/orders
+     *  -H "Content-Type: application/json"
+     *  -d "{\"numberTable\": Integer,  \"itemNumber\": Integer, \"unitOrder\": Integer"}"
     */
     @PostMapping("/orders")
     public TableOrder addNewOrder(
@@ -265,6 +274,97 @@ public class MenuController {
         }
 
     }   
+    
+    /* Delete order
+     *  localhost:8080/sirenarestaurants/order/X/paid - for order paid
+     *  localhost:8080/sirenarestaurants/order/X/wrong - for wrong orders
+    */
+    @DeleteMapping("/order/{id}/{reason}")
+    public String removeOrder(
+        @PathVariable("id") Integer id,
+        @PathVariable("reason") String reason){
+
+        // Get orders by id
+        Optional<Order> orderOptional = this.orderRepository.findById(id);
 
 
+        if(!orderOptional.isPresent()){return null;}
+
+        // order to delete
+        Order orderToDelete = orderOptional.get();
+
+        if(reason.equals("paid") || reason.equals("wrong")){
+            this.orderRepository.delete(orderToDelete);
+        }else{
+            return null;
+        }
+        return "Order: " + orderToDelete.getId() + " Item: " + orderToDelete.getItem() + " was deletede because the order was " + reason;
+
+    }
+
+    /* Add a new Table 
+     *  curl -X POST localhost:8080/sirenarestaurants/tables
+     *  -H "Content-Type: application/json" -d "{}"
+    */
+    @PostMapping("/tables")
+    public TableOrder addNewTable(@RequestBody TableOrder tableOrder){
+        if(tableOrder.getStatusTable()==null){
+            tableOrder.setStatusTable("closed");
+        }
+        if(tableOrder.getTotalTable()==null){
+            tableOrder.setTotalTable(0.0);
+        }
+
+        TableOrder tableAdded = tableOrder;
+        return this.tableRepository.save(tableAdded);
+    }
+
+    /* Remove a table from the table list
+     *  curl -X DELETE localhost:8080/sirenarestaurants/tables/ X
+    */
+    @DeleteMapping("/table/{id}")
+    public String removeTable(@PathVariable("id") Integer id){
+        Optional<TableOrder> tableOptional = this.tableRepository.findById(id);
+        if(!tableOptional.isPresent()){return null;}
+
+        TableOrder tableToDelete = tableOptional.get();
+        String result = "";
+
+        if(tableToDelete.getId()<6){
+            result = " Can't be removed";
+        }
+
+        if(tableToDelete.getId()>5){
+            result = " Was Deleted";
+            this.tableRepository.delete(tableToDelete);
+            
+        }
+        return "Table: " + tableToDelete.getId() + result;
+        
+    }
+    
+    /* Add menu item
+     *  curl -X POST localhost:8080/sirenarestaurants/menu
+     *  -H "Content-Type: application/json"
+     *  -d "{\"category\": String, \"item\": String, \"description\": String, \"price\": Double}"
+    */
+    @PostMapping("/menu")
+    public MenuItem addNewItem(@RequestBody MenuItem menuItem){
+        return this.menuRepository.save(menuItem);
+    }
+
+    /*Delete menu item
+     * curl -X DELETE localhost:8080/sirenarestaurants/menu/X
+    */
+    @DeleteMapping("/menu/{id}")
+    public String deleteItem(@PathVariable("id") Integer id){
+        Optional<MenuItem> itemOptional = this.menuRepository.findById(id);
+
+        if(!itemOptional.isPresent()){return null;}
+
+        MenuItem deleteItem = itemOptional.get();
+        this.menuRepository.delete(deleteItem);
+        return "Id Item: " + deleteItem.getItemNumber() + "Name Item: " + deleteItem.getItem() + " was deleted";
+
+    }
 }

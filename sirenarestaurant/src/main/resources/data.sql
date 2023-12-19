@@ -40,8 +40,6 @@ VALUES
     ('Return total order from table Integer 3','URL','localhost:8080/sirenarestaurants/table/3'),
     ('Return total order from table Integer 4','URL','localhost:8080/sirenarestaurants/table/4'),
     ('Return total order from table Integer 5','URL','localhost:8080/sirenarestaurants/table/5'),
-    ('Switch table status to open, to receive orders','CURL','curl -X PUT localhost:8080/sirenarestaurants/table/X'),
-    ('Switch table status to close the table, to not receive orders','CURL','curl -X PUT localhost:8080/sirenarestaurants/table/X'),
     ('Get the total balance for table 1','URL','localhost:8080/sirenarestaurants/table/1'),
     ('Get the total balance for table 2','URL','localhost:8080/sirenarestaurants/table/2'),
     ('Get the total balance for table 3','URL','localhost:8080/sirenarestaurants/table/3'),
@@ -51,5 +49,4 @@ VALUES
     ('Returns a item list by category Appetizers','URL','localhost:8080/sirenarestaurants/menu/appetizers'),
     ('Returns a item list by category Desserts','URL','localhost:8080/sirenarestaurants/menu/desserts'),
     ('Returns a item list by category Drinks','URL','localhost:8080/sirenarestaurants/menu/drinks'),
-    ('Returns a item list by category Main Course','URL','localhost:8080/sirenarestaurants/menu/main course'),
-    ('Add a new order - numberTable: 1 to 5 -  itemNumber: 1 to 20 - unitOrder: 1 to 99', 'CURL', 'curl -X POST localhost:8080/sirenarestaurants/table/X');
+    ('Returns a item list by category Main Course','URL','localhost:8080/sirenarestaurants/menu/main course');  
